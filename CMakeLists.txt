@@ -10,6 +10,7 @@ add_executable(lui_thing
     src/core/stringprintf.cpp
     src/core/mmap_file.cpp
     src/core/refpack.cpp
+    src/core/hashname.cpp
 
 
     # core/SDL

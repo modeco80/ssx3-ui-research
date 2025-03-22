@@ -4,7 +4,8 @@
 #include <cstdio>
 #include <core/refpack.hpp>
 #include <core/stringprintf.hpp>
-#include "core/file.hpp"
+#include <core/file.hpp>
+#include <core/hashname.hpp>
 
 int main(int argc, char** argv) {
 	auto mm = core::MmapFile::Open("/home/lily/ssx3ui/FE.LUI");
@@ -12,9 +13,12 @@ int main(int argc, char** argv) {
 	auto viewSpan = view.GetView();
 
 	auto* pLuiHeader = reinterpret_cast<lui::structs::Header*>(viewSpan.data());
+    if(!pLuiHeader->Valid()) {
+        printf("Invalid LUI file\n");
+        return 1;
+    }
 
 	auto* pScreenBlock = pLuiHeader->ScreenBlock();
-
     auto* pScreensPtr = pScreenBlock->GetBlockPtr();
 
 	for(auto i = 0; i < pScreenBlock->elemCount; ++i) {
@@ -28,8 +32,8 @@ int main(int argc, char** argv) {
 		screenEntry.hashName);
 
 
-        if(screenEntry.hashName == 0x08065fde) {
-            printf("found \"07main_men\"\n");
+        if(screenEntry.hashName == core::GetHashValue32("06title")) {
+            printf("found \"06title\"\n");
         }
 
         auto ptr = screenEntry.GetCompressedDataPtr(pLuiHeader);
@@ -38,14 +42,13 @@ int main(int argc, char** argv) {
             printf("UH OH!!! %04x\n", *reinterpret_cast<u16*>(screenEntry.GetCompressedDataPtr(pLuiHeader)));
         }
 
+#if 0
         auto refDecompressed = core::refpack::Decompress(ptr);
-
         auto format = core::StringPrintf("screen_%04d_%08x.bin", i, screenEntry.hashName);
-
         auto file = core::File::Open(format.c_str(), O_RDWR|O_CREAT);
         file.Write(&refDecompressed[0], refDecompressed.size());
-
         printf("wrote \"%s\"\n", format.c_str());
+#endif
 	}
 
 	return 0;

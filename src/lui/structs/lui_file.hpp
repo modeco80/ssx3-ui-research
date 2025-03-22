@@ -76,11 +76,13 @@ namespace lui::structs {
 	struct TextureBlockEntry {
 		u32 hashName;
 
-		u8 pad;
+		u8 pad; // seems to be unused
 		u8 textureId;
-		u8 pad2;
-		u8 pad3;
+		u8 pad2; // same here
+		u8 pad3; // same here
 
+		// rect of where in textures[textureId] (the texture sheet)
+		// the specicific "texture object" is.
 		f32 x;
 		f32 y;
 		f32 w;
