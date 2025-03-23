@@ -1,47 +1,10 @@
 import std.io;
 
-#include <std/mem.pat>
-#include <std/string.pat>
-
-// Steal this implementation if you want
-// (thank u otpsp daddy)
-fn GetHashValue32(str input) {
-    u32 hash = 0;
-    u32 high = 0;
-    
-    u64 len = std::string::length(input);
-    
-    for(u64 i = 0, i < len, i += 1) {
-        hash = (hash << 4) + std::string::at(input, i);
-        
-        high = hash & 0xf0000000;
-        
-        if(high)
-            hash ^= high >> 23;
-
-        hash &= ~high;
-    }
-
-    return hash;
-};
-
-
 struct LuiBlockData<T> {
     u32 count;
     T objects[count];
     //T object;
 };
-
-fn testString(str test) {
-    std::print("hash of \"{}\" is 0x{:08x}", test, GetHashValue32(test));
-    return GetHashValue32(test);
-};
-
-testString("tReal");
-testString("Menu0000");
-testString("00");
-
-testString("hudelem");
 
 enum eUIObjectType : u16 {
     kGroup = 0x10,
@@ -73,8 +36,9 @@ struct tUIBaseObject {
     u32 paddingSpace[5]; // maybe for UI Internal usage?
     
     std::print(
-        "OBJECT: name: 0x{:08x}, visible: {}, wrap: {}, orientation: {}, drawlayer: {}",
+        "OBJECT: name: 0x{:08x}, type: {}, visible: {}, wrap: {}, orientation: {}, drawlayer: {}",
         hashName,
+        objectType,
         (flags & 0x200) ? "ya" : "no",
         (flags & 0x80) ? "ya" : "no",
         (flags & 0x40) != 0 ,
@@ -83,8 +47,12 @@ struct tUIBaseObject {
     
     // TODO: Parse every object type
     
+    if(objectType == eUIObjectType::kGroup) {
+        u32 nrGroupItems;
+        u32 groupObjectHashes[nrGroupItems];
+    }
     
-    if(objectType == eUIObjectType::kIcon) {
+    else if(objectType == eUIObjectType::kIcon) {
         u32 iconFlags;
         u32 textureElementHashName;
         
@@ -156,8 +124,6 @@ struct tUIKCPBase {
     eKCPOpCode opcode [[color("00FFFF")]];
     padding [1];
     u16 size;
-    
-    //std::print("OPCODE AT {:08x}: {}", $, opcode);
     
     // Keyframe
     
@@ -245,7 +211,10 @@ struct tUIFrameHeader {
     u32 dataSize;
     u16 frameIndex;
     u16 nrKCPInsts;
-    tUIKCPBase KCPInstructions[nrKCPInsts];
+    
+    std::print("KCP PROGRAM for frame {:4d}", frameIndex);
+    tUIKCPBase a[nrKCPInsts];
+    std::print("END KCP PROGRAM for frame {:4d}", frameIndex);
 };
 
 
