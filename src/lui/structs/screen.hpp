@@ -36,6 +36,8 @@ namespace lui::structs {
 		// & 0x200 = visible
 		u32 flags;
 
+		u32 pad[5];
+
 		template <class T>
 		auto* CastTo()
 			requires(std::is_base_of_v<tUIBaseObject, T>)
@@ -51,7 +53,6 @@ namespace lui::structs {
 	struct tTextObject : tUIBaseObject {
 		constexpr static auto kType = eUIObjectType::kText;
 
-		u32 pad[5];
 		u16 fontIndex;
 
 		// flags:

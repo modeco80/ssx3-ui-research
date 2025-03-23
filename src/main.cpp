@@ -18,6 +18,18 @@ int main(int argc, char** argv) {
         return 1;
     }
 
+    // font block
+    auto* pFontBlock = pLuiHeader->FontBlock();
+    auto* pFontBlockPtr = pFontBlock->GetBlockPtr();
+    auto* pFontEnt = pFontBlock->GetBlockPtr();
+    for(auto i = 0; i < pFontBlock->elemCount; ++i) {
+        auto name = pFontEnt->GetName();
+        printf("Font %d: %s\n", i, name.data());
+        pFontEnt = pFontEnt->Next();
+    }
+
+
+
 	auto* pScreenBlock = pLuiHeader->ScreenBlock();
     auto* pScreensPtr = pScreenBlock->GetBlockPtr();
 
