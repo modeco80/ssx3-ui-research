@@ -1,67 +1,44 @@
-#include <std/mem.pat>
-#include <std/string.pat>
-
-// Steal this implementation if you want
-// (thank u otpsp daddy)
-fn GetHashValue32(str input) {
-    u32 hash = 0;
-    u32 high = 0;
-    
-    u64 len = std::string::length(input);
-    
-    for(u64 i = 0, i < len, i += 1) {
-        hash = (hash << 4) + std::string::at(input, i);
-        
-        high = hash & 0xf0000000;
-        
-        if(high)
-            hash ^= high >> 23;
-
-        hash &= ~high;
-    }
-
-    return hash;
-};
-
-
-fn testString(str test) {
-    std::print("hash of \"{}\" is 0x{:08x}", test, GetHashValue32(test));
-    return GetHashValue32(test);
-};
-
-testString("06title");
-
-struct LuiBlockData<T> {
+struct UIBlock<T> {
     u32 count;
     T objects[count];
 };
 
-struct LuiAnimation {
+// Animations
+
+struct tUIAnimChannel {
+    u16 unk;
+    u16 frameOffsetMaybe;
+    u16 size;
+    u16 numChannelInsts;
+    
+    // TODO: Figure out what these do
+    u32 channelInsts[numChannelInsts];
+};
+
+struct tUIAnimation {
     u32 unk;
-    u32 unk2;
+    u32 nrChannels;
     u32 hashName;
     u32 dataSize;
     
-    u8 animData[dataSize - 0x10]; // PARSE LATER
+    tUIAnimChannel channels[nrChannels];
 };
 
-struct LuiScreen {
+// Screens
+
+struct tUIScreen {
     u32 hashName;     // hashed (with GetHashValue32) screen name
     u32 screenDataOff;// relative offset to (compressed) object data
                       // relative to the start of this table
-    
-    if(hashName == GetHashValue32("06title")) {
-        std::print("Found main menu screen in table, off is 0x{:08x} (we are at 0x{:08x})", parent.parent.screenBlockOffset + screenDataOff, $);
-    }
-    
+                      
     // screendata is REFPACK compressed,
     // this points to the 10 FB magic.
     u16 thing @ (parent.parent.screenBlockOffset) + screenDataOff;
 };
     
+// Texture
 
-
-struct LuiTexture {
+struct tUITexture {
     u32 hashName;
     
     u8 pad;
@@ -69,30 +46,24 @@ struct LuiTexture {
     u8 pad2;
     u8 pad3;
     
-    // rectangle
+    // rectangle (pretty sure) of 
+    // the texture in the given texture
     float x;
     float y;
     float w;
     float h;
-    
-    // fe_1.LUI test
-    if(hashName == GetHashValue32("macface"))
-        std::print("apple {}", textureId);
-        
-        
-         if(hashName == 0x74ae)
-        std::print("apple {}", textureId);
 };
 
+// Font
 
-struct LuiFontName {
+struct tUIFont {
     u32 fontNameHash; 
     u32 fontNameLength;
     char name[fontNameLength];
 };
 
 
-struct LuiHeaderBlock {
+struct tUIHeader {
     u8 magic[4]; // 'IYF '
     float Cookie;  // 3.9 for retail SSX 3
     
@@ -102,14 +73,16 @@ struct LuiHeaderBlock {
     
     u32 textureBlockOffset;
     
-    u32 fontNameTableOffset;
+    u32 fontBlockOffset;
+    
+    //tUIAnimation testAnim @ 0x1c;
     
     // data tables.
-    LuiBlockData<LuiAnimation> animationBlock @ animBlockOffset;
-    LuiBlockData<LuiScreen> screenBlock @ screenBlockOffset;
-    LuiBlockData<LuiTexture> textureBlock @ textureBlockOffset;
-    LuiBlockData<LuiFontName> fontNameTable @ fontNameTableOffset;
+    UIBlock<tUIAnimation> animationBlock @ animBlockOffset;
+    UIBlock<tUIScreen> screenBlock @ screenBlockOffset;
+    UIBlock<tUITexture> textureBlock @ textureBlockOffset;
+    UIBlock<tUIFont> fontBlock @ fontBlockOffset;
 };
 
 
-LuiHeaderBlock lui @ 0x0;
+tUIHeader lui @ 0x0;

@@ -1,9 +1,14 @@
 import std.io;
 
-struct LuiBlockData<T> {
+struct UIBlock<T> {
     u32 count;
     T objects[count];
-    //T object;
+};
+
+// I think?
+struct tUIVertex {
+    u8 x;
+    u8 y;
 };
 
 enum eUIObjectType : u16 {
@@ -15,7 +20,7 @@ enum eUIObjectType : u16 {
     kPair = 0x15,
     kSlider = 0x16,
     kText = 0x17,
-    kVector = 0x18, // vector bitmap ?
+    kVector = 0x18,
     kProgress = 0x19,
     kTextScroll = 0x20,
     kScroll = 0x21
@@ -36,7 +41,8 @@ struct tUIBaseObject {
     u32 paddingSpace[5]; // maybe for UI Internal usage?
     
     std::print(
-        "OBJECT: name: 0x{:08x}, type: {}, visible: {}, wrap: {}, orientation: {}, drawlayer: {}",
+        "OBJECT @ 0x{:08x}: name: 0x{:08x}, type: {}, visible: {}, wrap: {}, orientation: {}, drawlayer: {}",
+        $,
         hashName,
         objectType,
         (flags & 0x200) ? "ya" : "no",
@@ -60,7 +66,39 @@ struct tUIBaseObject {
         // these are / 100.
         u16 tileU;
         u16 tileV;
-    }  else if(objectType == eUIObjectType::kText) {
+    }  
+    
+    else if(objectType == eUIObjectType::kListBox) {
+        u16 listBoxFontIndex; // index in LUI Font block
+        u16 listBoxFlags;
+        
+        if(listBoxFlags & 1)
+            std::print("ListBox has shadow!");
+        
+        u8 listBoxShadowColorA;
+        u8 listBoxShadowColorR;
+        u8 listBoxShadowColorG;
+        u8 listBoxShadowColorB;
+    }
+    
+    
+    else if(objectType == eUIObjectType::kMenu) {
+        u32 menuNumThings;
+        u32 menuThingHashNames[menuNumThings];
+    }
+    
+    else if(objectType == eUIObjectType::kPair) {
+        u32 pairEntryHashName;
+        u32 pairWidgetHashName;
+    }
+        
+    else if(objectType == eUIObjectType::kSlider) {
+        u32 sliderUnk;
+        u32 sliderBackgroundHashName;
+        u32 sliderKnobHashName;
+    }
+    
+    else if(objectType == eUIObjectType::kText) {
         u16 fontIndex;
         
         // & 1 = shadow
@@ -75,16 +113,32 @@ struct tUIBaseObject {
         if(textFlags & 1) {
             std::print("text has shadow");
         }
-    } else if(objectType == eUIObjectType::kMenu) {
-        u32 menuNumThings;
-        u32 menuThingHashes[menuNumThings];
-    } else {
+    } 
+    
+    else if(objectType == eUIObjectType::kVector) {
+       u8 nrVerts;
+       u8 vertexFlagsHigh;
+       u8 vertexFlagsLow;
+       u8 unk;
+       u8 data[objectSize - 0x24];
+    } 
+    
+    
+    else if(objectType == eUIObjectType::kVector) {
+       u8 nrVerts;
+       u8 vertexFlagsHigh;
+       u8 vertexFlagsLow;
+       u8 unk;
+       u8 data[objectSize - 0x24];
+    } 
+     
+     else {
         // TODO: Parse based on size
         u8 data[objectSize - 0x20];
     }
 } [[single_color]];
 
-// Frame
+// Frame (keyframes)
 
 // TERMS
 // KCP - Keyframe Control Program
@@ -218,17 +272,15 @@ struct tUIFrameHeader {
 };
 
 
-struct screenHeader {
+struct tUIScreenBase {
     u32 hashName; // Duplicated. Probably jus tto be sure
     
     u32 objectBlockOffset;
     u32 frameBlockOffset;
     u32 unkOffset3; // not sure what this is because it doesn't seem to appear in retail screens
     
-    
-    LuiBlockData<tUIBaseObject> objectBlock @ objectBlockOffset;
-    LuiBlockData<tUIFrameHeader> frameBlock @ frameBlockOffset;
+    UIBlock<tUIBaseObject> objectBlock @ objectBlockOffset;
+    UIBlock<tUIFrameHeader> frameBlock @ frameBlockOffset;
 };
 
-
-screenHeader header @ 0;
+tUIScreenBase screen @ 0;
