@@ -21,7 +21,6 @@ target_include_directories(core PUBLIC ${PROJECT_SOURCE_DIR}/src)
 add_library(core_sdl
     # core/SDL
     src/core/sdl/window.cpp
-    src/core/sdl/texture.cpp
 )
 
 target_compile_features(core_sdl PUBLIC
@@ -52,13 +51,4 @@ target_link_libraries(hashname PRIVATE
 )
 
 
-# test player thing maybe
-
-add_executable(lui_thing
-    src/main.cpp
-)
-
-target_link_libraries(lui_thing PRIVATE
-    core
-    core_sdl
-)
+add_subdirectory(src/player)

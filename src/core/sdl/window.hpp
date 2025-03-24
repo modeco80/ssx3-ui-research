@@ -28,7 +28,7 @@ namespace core::sdl {
 			return window;
 		}
 
-		SDL_Surface* GetSurface();
+		SDL_Renderer* GetRenderer();
 
 		SDL_Rect GetRect();
 
@@ -40,6 +40,7 @@ namespace core::sdl {
 
 	   private:
 		SDL_Window* window {};
+		SDL_Renderer* renderer;
 		std::unordered_map<std::uint32_t, EventHandlerFn> events {};
 	};
 
