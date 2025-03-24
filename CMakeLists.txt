@@ -35,6 +35,14 @@ target_link_libraries(core_sdl PUBLIC
     SDL2::SDL2
 )
 
+add_executable(screendump
+    src/screendump_tool.cpp
+)
+
+target_link_libraries(screendump PRIVATE
+    core
+)
+
 add_executable(hashname
     src/hashname_tool.cpp
 )
@@ -42,6 +50,9 @@ add_executable(hashname
 target_link_libraries(hashname PRIVATE
     core
 )
+
+
+# test player thing maybe
 
 add_executable(lui_thing
     src/main.cpp
